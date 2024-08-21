@@ -8,6 +8,11 @@
 </head>
 <body>
   <div class="app">
+    <div class="display">
+      <div class="text-wrapper">
+        Distance <span id="distance">0</span> unit
+      </div>
+    </div>
   </div>
 
   <script type="importmap">
@@ -34,6 +39,9 @@
 
     let controller, controllerGrip;
     let INTERSECTED;
+    
+    const displayContainer = document.getElementsByClassName('display')[0];
+    const displayText = document.getElementById('distance');
 
     init();
 
@@ -122,12 +130,9 @@
       const controllerModelFactory = new XRControllerModelFactory();
 
       controllerGrip = renderer.xr.getControllerGrip( 0 );
-
       const controllerModel = controllerModelFactory.createControllerModel( controllerGrip );
       controllerModel.scale.set( 2, 2, 2 );
       controllerModel.position.set( 0, 0, 0 );
-      console.log(controllerModel)
-
       controllerGrip.add( controllerModel );
       scene.add( controllerGrip );
 
@@ -137,7 +142,6 @@
         'optionalFeatures': [ 'depth-sensing' ],
         'depthSensing': { 'usagePreference': [ 'gpu-optimized' ], 'dataFormatPreference': [] }
       } ) );
-
     }
 
     function buildController( data ) {
@@ -183,6 +187,7 @@
       }
 
       // find intersections
+      let _distance;
       raycaster.setFromXRController( controller );
       const intersects = raycaster.intersectObjects( room.children, false );
       if ( intersects.length > 0 ) {
@@ -192,10 +197,14 @@
           INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
           // INTERSECTED.material.emissive.setHex( 0xff0000 );
           INTERSECTED.material.emissive.setHex( 0x0000ff );
+          
+          displayContainer.className = 'display show';
+          displayText.innerText = intersects[ 0 ].distance.toFixed(2);
         }
       } else {
         if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
         INTERSECTED = undefined;
+        displayContainer.className = 'display';
       }
 
       // Keep cubes inside room
